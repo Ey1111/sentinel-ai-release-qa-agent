@@ -1,0 +1,15 @@
+{
+  "name": "@sentinel/browser-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:integration": "vitest run --config ../../vitest.integration.config.ts src/runtime.integration.test.ts"
+  },
+  "dependencies": {
+    "playwright": "^1.62.1"
+  }
+}

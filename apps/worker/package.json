@@ -1,0 +1,14 @@
+{
+  "name": "@sentinel/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "run:taskforge": "tsx src/run-taskforge.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": { "@sentinel/browser-runtime": "workspace:*" },
+  "devDependencies": { "tsx": "^4.20.5" }
+}
