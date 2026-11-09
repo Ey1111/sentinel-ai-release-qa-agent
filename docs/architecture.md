@@ -16,6 +16,8 @@
 ```mermaid
 flowchart TB
     User[Product / QA / Developer] --> Web[Next.js Web UI]
+    Host[MCP Host] -->|stdio; Streamable HTTP later| MCP[Sentinel MCP Adapter]
+    MCP --> API
     Web --> API[Typed HTTP API]
     Web <-->|SSE with sequence cursor| Events[Run Event Stream]
 
@@ -50,6 +52,7 @@ flowchart TB
 ### Deployment boundary
 
 - `web/api`: user-facing control plane; never launches a browser inside an HTTP request.
+- `mcp`: high-level client adapter over the API; never bypasses Plan review, policy, or evidence rules.
 - `worker`: long-running data-plane process allowed to launch Chromium.
 - PostgreSQL: canonical Run/Step/Decision/Action/Observation/Finding state and job leases.
 - artifact store: screenshot, trace, DOM extract, and reports. Binary data is not stored in PostgreSQL.
@@ -161,8 +164,8 @@ stateDiagram-v2
     WAITING_APPROVAL --> RUNNING: approved and revalidated
     WAITING_APPROVAL --> PAUSED: rejected / expired
     PAUSED --> RUNNING: safe resume
-    RUNNING --> COMPLETED: all required steps terminal
-    RUNNING --> FAILED: business assertion failed or unrecoverable error
+    RUNNING --> COMPLETED: all required steps terminal (PASS/FAIL/UNCERTAIN)
+    RUNNING --> FAILED: execution / infrastructure failure
     CREATED --> CANCELLED: cancel
     PLANNING --> CANCELLED: cancel
     READY --> CANCELLED: cancel
@@ -233,6 +236,7 @@ Proposed future monorepo modules, not created in Phase 0:
 - `apps/web`: UI and BFF.
 - `apps/api`: typed HTTP control plane.
 - `apps/worker`: browser and background job process.
+- `apps/mcp`: stdio MCP adapter exposing high-level Sentinel workflow tools.
 - `apps/demo-target`: TaskForge with break modes.
 - `packages/contracts`: schemas and generated API types.
 - `packages/agent-core`: prompts, structured agent clients, budgets.
@@ -259,4 +263,3 @@ Proposed future monorepo modules, not created in Phase 0:
 - Object storage provider and retention duration.
 - LLM model selection after baseline evaluation.
 - Whether a dedicated workflow engine is justified by later scale and long human waits.
-

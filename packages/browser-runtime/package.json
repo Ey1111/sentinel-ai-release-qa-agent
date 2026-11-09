@@ -7,9 +7,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test:integration": "vitest run --config ../../vitest.integration.config.ts src/runtime.integration.test.ts"
+    "test:integration": "vitest run --root ../.. --config vitest.integration.config.ts packages/browser-runtime/src/runtime.integration.test.ts packages/browser-runtime/src/interactive-session.integration.test.ts"
   },
   "dependencies": {
+    "@sentinel/contracts": "workspace:*",
     "playwright": "^1.62.1"
   }
 }

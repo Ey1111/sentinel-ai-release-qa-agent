@@ -9,7 +9,10 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@sentinel/agent-core": "workspace:*",
+    "@sentinel/contracts": "workspace:*",
     "@sentinel/db": "workspace:*",
+    "@sentinel/llm": "workspace:*",
     "fastify": "^5.5.0"
   },
   "devDependencies": { "tsx": "^4.20.5" }

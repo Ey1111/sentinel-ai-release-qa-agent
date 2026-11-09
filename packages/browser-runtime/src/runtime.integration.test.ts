@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
-import { BrowserRuntime, type FixedTestSpec } from "./index";
+import { BrowserRuntime, InteractiveBrowserSession, type FixedTestSpec } from "./index";
 
 let server: Server;
 let origin = "";
@@ -122,5 +122,50 @@ describe("BrowserRuntime with real Chromium", () => {
     expect(result.status).toBe("FAILED");
     expect(result.steps[0]?.error?.code).toBe("POLICY_VIOLATION");
     expect(result.steps[0]?.error?.message).toContain("Origin is not allowlisted: http://example.com");
+  });
+});
+
+describe("InteractiveBrowserSession with grounded element refs", () => {
+  it("observes and executes against a real page without accepting selectors", async () => {
+    const root = await mkdtemp(join(tmpdir(), "sentinel-session-"));
+    roots.push(root);
+    const session = new InteractiveBrowserSession({
+      runId: "interactive-success",
+      artifactRoot: root,
+      allowedOrigins: [origin],
+      allowLocalhost: true,
+      timeoutMs: 2_000,
+      headless: true,
+    });
+    await session.open();
+    try {
+      await session.execute({ stepId: "interactive-step", action: { type: "NAVIGATE", url: origin } });
+      const observed = (await session.observe({ stepId: "interactive-step" })).observation;
+      const textbox = observed.interactiveElements.find((element) => element.role === "textbox" && element.name === "Project name");
+      const button = observed.interactiveElements.find((element) => element.role === "button" && element.name === "Create project");
+      expect(textbox?.ref).toMatch(/^p\d+-o\d+-e\d+$/);
+      expect(button?.ref).toMatch(/^p\d+-o\d+-e\d+$/);
+      await session.execute({ stepId: "interactive-step", action: { type: "FILL", elementRef: textbox!.ref, value: "Release QA" } });
+      await session.execute({ stepId: "interactive-step", action: { type: "CLICK", elementRef: button!.ref } });
+      expect((await session.observe({ stepId: "interactive-step" })).observation.visibleText).toContain("Release QA");
+    } finally {
+      await session.close();
+    }
+  });
+
+  it("rejects stale element refs after a new observation", async () => {
+    const root = await mkdtemp(join(tmpdir(), "sentinel-session-"));
+    roots.push(root);
+    const session = new InteractiveBrowserSession({ runId: "interactive-stale", artifactRoot: root, allowedOrigins: [origin], allowLocalhost: true, timeoutMs: 2_000, headless: true });
+    await session.open();
+    try {
+      await session.execute({ stepId: "stale-step", action: { type: "NAVIGATE", url: origin } });
+      const first = (await session.observe({ stepId: "stale-step" })).observation;
+      const oldRef = first.interactiveElements[0]!.ref;
+      await session.observe({ stepId: "stale-step" });
+      await expect(session.execute({ stepId: "stale-step", action: { type: "CLICK", elementRef: oldRef } })).rejects.toMatchObject({ code: "ACTION_FAILED" });
+    } finally {
+      await session.close();
+    }
   });
 });

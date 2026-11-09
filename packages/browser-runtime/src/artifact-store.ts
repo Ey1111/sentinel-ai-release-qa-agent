@@ -13,7 +13,14 @@ export class ArtifactStore {
   private entries: ArtifactManifestEntry[] = [];
 
   constructor(options: ArtifactStoreOptions) {
-    this.runDir = resolve(options.rootDir, "runs", options.runId);
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/.test(options.runId)) {
+      throw new Error("Artifact run ID must be a safe single path segment");
+    }
+    const runsDir = resolve(options.rootDir, "runs");
+    this.runDir = resolve(runsDir, options.runId);
+    if (!this.runDir.startsWith(`${runsDir}${sep}`)) {
+      throw new Error("Artifact run ID must be a safe single path segment");
+    }
     this.manifestPath = resolve(this.runDir, "manifest.json");
     this.now = options.now ?? (() => new Date());
   }

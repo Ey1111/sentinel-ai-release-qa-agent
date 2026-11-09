@@ -26,3 +26,6 @@ export async function checkDatabase(databaseUrl: string): Promise<boolean> {
     await client.end({ timeout: 2 });
   }
 }
+
+export * from "./outcome-store";
+export * from "./run-store";

@@ -10,8 +10,10 @@ test("fixed runtime spec completes TaskForge in a real isolated browser", async 
   const artifactRoot = await mkdtemp(join(tmpdir(), "sentinel-taskforge-runtime-"));
   try {
     const spec = createTaskForgeFixedSpec({ runId: "taskforge-runtime-e2e", targetUrl: "http://127.0.0.1:4174" });
+    spec.timeoutMs = 10_000;
     const result = await new BrowserRuntime({ artifactRoot, headless: true }).run(spec);
-    expect(result.status).toBe("PASSED");
+    const failures = result.steps.filter((step) => step.status === "FAILED").map((step) => ({ id: step.id, error: step.error }));
+    expect(result.status, JSON.stringify(failures)).toBe("PASSED");
     expect(result.steps.every((step) => step.status === "PASSED")).toBe(true);
     expect(result.steps.find((step) => step.id === "verify-renamed-project")?.observation?.visibleText).toContain("Sentinel Release Gate");
     const runState = JSON.parse(await readFile(join(artifactRoot, "runs", spec.runId, "run.json"), "utf8"));

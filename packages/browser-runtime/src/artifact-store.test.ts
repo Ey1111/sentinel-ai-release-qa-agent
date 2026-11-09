@@ -34,3 +34,10 @@ it("rejects an existing run directory instead of mixing artifact generations", a
   const duplicate = new ArtifactStore({ rootDir: root, runId: "run-1" });
   await expect(duplicate.initialize()).rejects.toThrow("Artifact run already exists: run-1");
 });
+
+it.each([
+  ["parent traversal", "../escape"],
+  ["an absolute path", join(tmpdir(), "sentinel-absolute-run")],
+])("rejects %s as a run ID before resolving an artifact directory", (_label, runId) => {
+  expect(() => new ArtifactStore({ rootDir: tmpdir(), runId })).toThrow("Artifact run ID must be a safe single path segment");
+});

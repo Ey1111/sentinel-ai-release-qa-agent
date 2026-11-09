@@ -1,0 +1,21 @@
+{
+  "name": "@sentinel/llm",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@ai-sdk/deepseek": "^3.0.36",
+    "ai": "^7.0.79",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@sentinel/contracts": "workspace:*"
+  }
+}

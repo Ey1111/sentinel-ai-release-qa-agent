@@ -6,13 +6,16 @@
   "scripts": {
     "build": "pnpm -r --if-present build",
     "dev": "pnpm --parallel --filter @sentinel/web --filter @sentinel/api --filter @sentinel/worker --filter @sentinel/demo-target dev",
+    "dev:mcp": "pnpm --filter @sentinel/mcp dev",
     "lint": "eslint .",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm test:unit",
     "test:unit": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:runtime": "playwright test tests/e2e/browser-runtime.spec.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "demo:e2e": "node scripts/demo-e2e.mjs",
+    "eval": "pnpm --filter @sentinel/worker eval"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",
